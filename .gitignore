@@ -12,3 +12,4 @@ yarn-error.log*
 # IDE / OS
 .vscode/
 .DS_Store
+dist/
