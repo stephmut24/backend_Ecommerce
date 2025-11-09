@@ -13,3 +13,7 @@ yarn-error.log*
 .vscode/
 .DS_Store
 dist/
+
+/src/generated/prisma
+
+/src/generated/prisma
