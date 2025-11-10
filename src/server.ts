@@ -1,37 +1,34 @@
-// src/server.ts
-import { env } from './config/env';
-import { connectDB } from './config/database';
-import app from './app';
+import 'dotenv/config';
+import { env } from './config/env.js';
+import { connectDB } from './config/database.js';
+import app from './app.js';
 
 const PORT = env.PORT;
 
 const startServer = async (): Promise<void> => {
   try {
-    console.log('🔄 Tentative de connexion à la base de données...');
+    console.log('Try to connect...');
     
-    // Connexion DB
+    // Connexion à la base de données
     await connectDB();
     
-    // Démarrage serveur
+    // Démarrage du serveur
     app.listen(PORT, () => {
       console.log(`
- SERVEUR DÉMARRÉ!
+Server run
  Port: ${PORT}
-Base de données: CONNECTÉE
+  Data Base: PostgreSQL
 
  Health Check: http://localhost:${PORT}/health
   Test DB: http://localhost:${PORT}/test-db
+ Users API: http://localhost:${PORT}/users
       `);
     });
 
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-    console.error('💥 ÉCHEC du démarrage:', errorMessage);
+    console.error('failed', error);
     process.exit(1);
   }
 };
-
-// Import nécessaire pour le test DB
-import prisma from './config/database';
 
 startServer();
