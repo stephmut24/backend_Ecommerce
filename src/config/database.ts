@@ -13,20 +13,19 @@ export const pool = new Pool({
 export const connectDB = async (): Promise<void> => {
   try {
     const client = await pool.connect();
-    console.log('✅ Connexion à PostgreSQL établie avec succès');
+    console.log('✅ Connect to Postgresql');
     
     // Test simple
     const result = await client.query('SELECT version()');
-    console.log('📊 Version PostgreSQL:', result.rows[0].version);
+    console.log('📊  PostgreSQL version:', result.rows[0].version);
     
     client.release();
   } catch (error) {
-    console.error('❌ Erreur de connexion à la base de données:', error);
+    console.error('❌ Database connection error:', error);
     throw error;
   }
 };
 
-// Fonction utilitaire pour exécuter des requêtes
 export const query = (text: string, params?: any[]) => {
   return pool.query(text, params);
 };
