@@ -26,4 +26,23 @@ router.post('/register', validate(registerSchema), async (req, res)=>{
     }
 })
 
+router.post('/login', validate(loginSchema), async (req, res)=>{
+    try {
+        const result = await AuthService.login(req.body);
+
+        if (result.success) {
+            res.status(200).json(result);
+        } else {
+            res.status(401).json(result);
+        }
+    } catch(error){
+        console.error('Login error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            errors: ['An unexpected error occurred']
+        });
+    }
+})
+
 export default router

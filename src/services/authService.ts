@@ -1,3 +1,4 @@
+
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import {query} from '../config/database.js';
@@ -61,6 +62,55 @@ export class AuthService {
 
         return createResponse(true, 'User registered successfully', userResponse)
         
+    }
+
+    //Login
+    static async login(loginData: LoginRequest): Promise<BaseResponse> {
+        const {email, password} = loginData;
+
+        //Found user by Email-address
+
+        const result = await query(
+            'SELECT id, username, email, password_hash, role FROM users WHERE email = $1',
+            [email.toLowerCase()]
+        );
+
+        if (result.rows.length === 0) {
+            return createResponse(false, 'Login failed', null, ['Invalid credentials']);
+        }
+
+        const user = result.rows[0];
+
+        //check password
+        const IsPasswordValid = await bcrypt.compare(password, user.password_hash);
+        if (!IsPasswordValid) {
+            return createResponse(false, 'Login failed', null, ['Invalid credentials']);
+        }
+
+        // Generate jwt
+        const token = jwt.sign(
+            {
+                userId : user.id,
+                username : user.username,
+                role: user.role
+            },
+            env.JWT_SECRET,
+            {expiresIn: '24h'}
+        );
+
+        const UserResponse : UserResponse = {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            role: user.role,
+            created_at: user.created_at
+        };
+
+        return createResponse(true, 'Login successful', {
+            user: UserResponse,
+            token
+        });
+
     }
    
 }
