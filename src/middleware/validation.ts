@@ -44,3 +44,20 @@ export const validate = (schema: z.ZodSchema) =>{
         }
     }
 }
+
+// Create a product schema validation
+export const createProductSchema = z.object({
+    name: z.string()
+        .min(3, 'Name must be at least 3 characters long')
+        .max(100, 'Name must not exceed 100 characters'),
+    description: z.string()
+        .min(10, 'Description must be at least 10 characteres long')
+        .max(1000, 'Description must not exceed 1000 characters'),
+    price: z.number()
+        .positive('Price must be a positive number')
+        .min(0.01, 'Price must be greater than 0'),
+    stock: z.number()
+        .int('Stock must be an integer')
+        .min(0, 'Stock must be a non-negative integer'),
+    category: z.string().optional(),
+})

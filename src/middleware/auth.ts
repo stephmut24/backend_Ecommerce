@@ -12,7 +12,7 @@ export interface AuthRequest extends Request {
 }
 
 export const authenticate = (req: AuthRequest, res:Response, next:NextFunction) =>{
-    const token = req.header('Authorization')?.replace('Bearer', '');
+    const token = req.header('Authorization')?.replace('Bearer ', '').trim();
 
     if(!token) {
         return res.status(401).json(

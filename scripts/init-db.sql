@@ -64,7 +64,7 @@ CREATE INDEX idx_order_items_product_id ON order_items(product_id);
 
 -- create defaut admin (password: Admin123!)
 INSERT INTO users (username, email, password_hash, role) VALUES 
-('admin', 'admin@ecommerce.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
+('admin', 'admin@ecommerce.com', '$2a$10$PdfIifnAIy8CyxNyqMqsjewJ02CQtsau69PbREI98rVWTjLazYmlW', 'admin');
 
 -- Products example
 INSERT INTO products (name, description, price, stock, category) VALUES 
