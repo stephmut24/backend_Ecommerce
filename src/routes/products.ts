@@ -30,28 +30,64 @@ router.post('/', authenticate, requireAdmin, validate(createProductSchema), asyn
 
 //PUT /products/:id
 router.put('/:id', authenticate, requireAdmin, validate(updateProductSchema), async(req: AuthRequest, res)=>{
-    try {
-    const productId = req.params.id;
-    const result = await ProductService.updateProduct(productId, req.body);
+      try {
+      const productId = req.params.id;
+      const result = await ProductService.updateProduct(productId, req.body);
 
-    if (result.success) {
-      res.status(200).json(result);
-    } else {
-      if (result.errors?.includes('Product does not exist')) {
-        res.status(404).json(result);
+      if (result.success) {
+        res.status(200).json(result);
       } else {
-        res.status(400).json(result);
+        if (result.errors?.includes('Product does not exist')) {
+          res.status(404).json(result);
+        } else {
+          res.status(400).json(result);
+        }
       }
-    }
-  } catch (error) {
-    console.error('Update product error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-      errors: ['An unexpected error occurred']
-});
+    } catch (error) {
+      console.error('Update product error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+        errors: ['An unexpected error occurred']
+     });
 
-  }
-})
+    }
+  })
+
+  // Get product 
+  router.get('/', async (req, res)=>{
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = req.query.search as string;
+
+      //validation des parametres de pagination
+      if (page < 1) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid page number',
+          errors: ['Page must be greater than 0']
+        })
+      }
+
+      if (limit < 1 || limit > 100) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid limit',
+          errors: ['Limit must be between 1 and 100']
+        });
+      }
+
+      const result = await ProductService.getProducts(page, limit, search);
+      res.status(200).json(result)
+    } catch (error) {
+      console.error('Get products error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+        errors: ['An unexpected error occured']
+      })
+    }
+  })
 
 export default router
