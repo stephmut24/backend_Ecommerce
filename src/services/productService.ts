@@ -150,4 +150,32 @@ export class ProductService {
         );
     }
 
+    //Get a product by ID
+    static async getProductById(productId: string): Promise<any> {
+        const result = await query(
+            `SELECT id, name, description, price, stock, category, created_at, updated_at
+            FROM products WHERE id = $1
+            `,
+            [productId]
+        );
+
+        if (result.rows.length === 0 ){
+            return createResponse(false, 'Product not found', null, ['Product does not exist']);
+        }
+
+        const product = result.rows[0];
+        const productResponse: ProductResponse = {
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            price:parseFloat(product.price),
+            stock: product.stock,
+            category: product.category,
+            created_at: product.created_at
+        };
+
+        return createResponse(true, 'Product retrieved successfully', productResponse);
+        
+    }
+
 }

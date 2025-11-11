@@ -2,6 +2,7 @@ import express from 'express'
 import { authenticate,AuthRequest,requireAdmin } from '../middleware/auth';
 import {validate, createProductSchema , updateProductSchema} from '../middleware/validation';
 import { ProductService } from '../services/productService';
+import { success } from 'zod/v4';
 
 
 
@@ -55,7 +56,7 @@ router.put('/:id', authenticate, requireAdmin, validate(updateProductSchema), as
   })
 
   // Get product 
-  router.get('/', async (req, res)=>{
+router.get('/', async (req, res)=>{
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
@@ -89,5 +90,29 @@ router.put('/:id', authenticate, requireAdmin, validate(updateProductSchema), as
       })
     }
   })
+
+//get product by ID
+router.get('/:id', async (req, res) =>{
+  try {
+    const productId = req.params.id;
+    const result = await ProductService.getProductById(productId)
+
+    if (result.success){
+      res.status(200).json(result);
+    } else {
+      res.status(404).json(result);
+    }
+  } catch (error) {
+    console.error('Get product error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      errors: ['An unexpected error occurred']
+    })
+    
+  }
+})
+
+
 
 export default router
