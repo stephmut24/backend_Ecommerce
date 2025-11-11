@@ -61,3 +61,27 @@ export const createProductSchema = z.object({
         .min(0, 'Stock must be a non-negative integer'),
     category: z.string().optional(),
 })
+
+//update products schema
+export const updateProductSchema = z.object({
+    name: z.string()
+        .min(3, 'Name must be at least 3 characters long')
+        .max(100, 'Name must not exceed 100 characters')
+        .optional(),
+    description: z.string()
+        .min(10, 'Description must be at least 10 characters long')
+        .max(1000, 'Description must not exceed 1000 characters')
+        .optional(),
+    price: z.number()
+        .positive('Price must be a positive number')
+        .min(0.01, 'Price must be greater than 0')
+        .optional(),
+    stock: z.number()
+        .int('Stock must be an integer')
+        .min(0, 'Stock must be a non-negative integer')
+        .optional(),
+    category: z.string().optional(),
+    
+}).refine(data => Object.keys(data).length > 0, {
+  message: 'At least one field must be provided for update'
+});
