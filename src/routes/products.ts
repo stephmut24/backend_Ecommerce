@@ -113,6 +113,31 @@ router.get('/:id', async (req, res) =>{
   }
 })
 
+router.delete('/:id', authenticate, requireAdmin, async (req: AuthRequest, res)=>{
+  try {
+    const productId = req.params.id;
+    const result = await ProductService.deleteProduct(productId)
+
+    if (result.success) {
+      res.status(200).json(result);
+    } else {
+      if (result.errors?.includes('Product does not ')){
+        res.status(404).json(result)
+      }else {
+        res.status(400).json(result);
+      }
+    }
+  } catch (error) {
+    console.error('Delete product error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      errors: ['An unexpected error occurred']
+    });
+    
+  }
+})
+
 
 
 export default router

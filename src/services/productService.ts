@@ -175,7 +175,36 @@ export class ProductService {
         };
 
         return createResponse(true, 'Product retrieved successfully', productResponse);
-        
+
+    }
+
+    //delete a product
+    static async deleteProduct(productId: string): Promise<any> {
+        // check if the product exist
+
+        const existingProduct = await query(
+            'SELECT id FROM products WHERE id = $1', 
+            [productId]
+        );
+
+        if (existingProduct.rows.length === 0) {
+            return createResponse(false, 'Product not found', null, ['Product does not exist']);
+        }
+
+        // check if the product is in order items
+
+        const orderItemsCheck = await query(
+            'SELECT id FROM order_items WHERE product_id = $1 LIMIT 1',
+            [productId]
+        );
+
+        if (orderItemsCheck.rows.length > 0) {
+            return createResponse(false, 'Cannot delete product', null, ['Product is associated with existing orders']);
+        }
+        await query('DELETE FROM products WHERE id = $1', [productId]
+        )
+
+        return createResponse(true, 'Product deleted successfully');
     }
 
 }
