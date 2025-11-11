@@ -95,3 +95,10 @@ export const createOrderSchema = z.object({
             .min(1, 'Quantity must be at least 1')
     })).min(1, 'Order must contain at least one item')
 })
+
+//Update orders validations schema
+export const updateOrderStatusSchema = z.object({
+    status: z.enum(['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'], {
+        errorMap: () => ({message: 'Status must be one of: pending, confirmed, shipped, delivered, cancelled'})
+    })
+})
