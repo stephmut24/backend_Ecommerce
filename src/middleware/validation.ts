@@ -85,3 +85,13 @@ export const updateProductSchema = z.object({
 }).refine(data => Object.keys(data).length > 0, {
   message: 'At least one field must be provided for update'
 });
+
+// create order validation schema
+export const createOrderSchema = z.object({
+    items: z.array(z.object({
+        productId: z.string().uuid('Product ID must be a valid UUID'),
+        quantity: z.number()
+            .int('Quantity must be an integer')
+            .min(1, 'Quantity must be at least 1')
+    })).min(1, 'Order must contain at least one item')
+})
