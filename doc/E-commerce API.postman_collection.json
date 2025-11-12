@@ -1,0 +1,717 @@
+{
+	"info": {
+		"_postman_id": "3536a8c0-d379-42a8-b6d4-49115cec033f",
+		"name": "E-commerce API",
+		"description": "E-commerce API collection for managing users, products, and orders.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "31459792"
+	},
+	"item": [
+		{
+			"name": "Authentification",
+			"item": [
+				{
+					"name": "Register User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has success true\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"user@example.com\",\n  \"password\": \"SecurePass123!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Purpose\nRegister a new user account in the E-commerce API.\n\nMethod and URL\n- HTTP Method: POST\n- URL: {{base_url}}/auth/register\n  - {{base_url}} is an environment/collection variable representing the API base URL.\n\nRequired headers\n- Content-Type: application/json\n\nRequest body\n- Body type: raw (JSON)\n- Schema (shape):\n  {\n    \"username\": \"string\",\n    \"email\": \"string (valid email)\",\n    \"password\": \"string (meets server password policy)\"\n  }\n- Example:\n  {\n    \"username\": \"testuser\",\n    \"email\": \"user@example.com\",\n    \"password\": \"SecurePass123!\"\n  }\n\nSuccessful response example (201)\n- Status: 201 Created\n- Body:\n  {\n    \"success\": true,\n    \"message\": \"User registered successfully\",\n    \"data\": {\n      \"id\": \"88e507c7-4eef-4616-bef3-773695854d67\",\n      \"username\": \"testuser\",\n      \"email\": \"user@example.com\",\n      \"role\": \"user\",\n      \"created_at\": \"2025-11-12T04:21:25.093Z\"\n    }\n  }\n\nExpected status codes\n- 201 Created: User registered successfully.\n- 400 Bad Request: Validation failed (e.g., missing fields, invalid email, weak password) or duplicate username/email.\n- 409 Conflict: Username or email already exists (if the API distinguishes from 400).\n- 500 Internal Server Error: Unexpected server error.\n\nTests in post-response script\n- \"Status code is 201\": Asserts the response status is 201.\n- \"Response has success true\": Parses JSON and asserts success === true.\n\nNotes\n- Ensure the base_url variable is set in the selected environment.\n- This request uses a raw JSON body; make sure Content-Type is application/json.\n- Save a 201 example after a successful call to streamline future testing/mocking."
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Save the user_token",
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"user_token\", jsonData.data.token);",
+									"    console.log(\"User token saved: \" + jsonData.data.token);",
+									"}",
+									"",
+									"pm.test(\"Login successful\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(pm.response.json().success).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"SecurePass123!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "- Name: Login User\n- Summary: Authenticate a user and return a JWT token for subsequent requests.\n- Method & URL: POST {{base_url}}/auth/login\n- Description:\n  This endpoint authenticates a user using their email and password. On success it returns a JSON object with user details and a JWT token. The request uses the workspace collection variable {{base_url}} for the base URL.\n- Request headers:\n  - Content-Type: application/json\n- Request body (raw JSON):\n  {\"email\": \"user@example.com\",\"password\": \"SecurePass123!\"}\n  - email: string — required, user's registered email address\n  - password: string — required, user's password\n- Successful response (HTTP 200) example:\n  {\"success\": true,\"message\": \"Login successful\",\"data\": {\"user\": { \"id\": \"uuid\", \"username\": \"testuser\", \"email\": \"user@example.com\", \"role\": \"user\" },\"token\": \"<jwt token>\" }}\n- Post-response actions:\n  The request has a post-response script that saves the returned token into the collection variable user_token (pm.collectionVariables.set(\"user_token\", jsonData.data.token)). This token can be used in subsequent requests, e.g. set Authorization: Bearer {{user_token}}.\n- Tests:\n  - Asserts status is 200\n  - Asserts response body success is true\n- Common errors:\n  - 400/422 — missing or invalid email/password\n  - 401 — invalid credentials\n- Security note:\n  - Do not commit real user passwords or production tokens into saved examples or descriptions. Use placeholder/example values only.\n- Example usage:\n  - Use this request to authenticate a test user before running protected endpoint requests; after a successful run the collection variable user_token will be populated for use by other requests."
+					},
+					"response": []
+				},
+				{
+					"name": "Login Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Sauvegarder le token admin",
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"admin_token\", jsonData.data.token);",
+									"    console.log(\"Admin token saved: \" + jsonData.data.token);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@ecommerce.com\",\n  \"password\": \"Admin123!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "POST /auth/login\n\nPurpose:\nAuthenticate a user (admin) and return a JWT token and user profile. Use this endpoint to obtain an authentication token for subsequent admin-protected requests.\n\nURL:\n{{base_url}}/auth/login\n\nHeaders:\n- Content-Type: application/json\n- Accept: application/json\n\nRequest body (application/json):\n{\n  \"email\": \"string\", // required - user email\n  \"password\": \"string\" // required - user password\n}\n\nExample request body:\n{\n  \"email\": \"admin@ecommerce.com\",\n  \"password\": \"Admin123!\"\n}\n\nSuccessful response (200):\n{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"uuid\",\n      \"username\": \"admin\",\n      \"email\": \"admin@ecommerce.com\",\n      \"role\": \"admin\"\n    },\n    \"token\": \"<JWT token>\"\n  }\n}\n\nErrors:\n- 400 Bad Request: missing or invalid fields.\n- 401 Unauthorized: invalid credentials.\n- 500 Internal Server Error: server-side error.\n\nNotes:\n- The request has a post-response script that saves the returned token to the collection variable 'admin_token' when the response code is 200. This variable can be used in subsequent admin requests as Authorization: Bearer {{admin_token}}.\n\nTesting tips:\n- Use a valid admin account. After a successful login, ensure subsequent admin requests include: Authorization: Bearer {{admin_token}}.\n"
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints and user management"
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Create Product (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Sauvegarder l'ID du produit créé",
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"product_id\", jsonData.data.id);",
+									"    console.log(\"Product ID saved: \" + jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"New product test\",\n  \"description\": \"Description of New product\",\n  \"price\": 99.99,\n  \"stock\": 50,\n  \"category\": \"Electronics\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products"
+							]
+						},
+						"description": "Summary:\nCreate a new product (Admin only).\n\nDetails:\nThis endpoint lets an admin create a new product in the catalog. The request requires a valid admin Bearer token in the Authorization header and a JSON body describing the product. On success it returns 201 Created and the created product data. The post-response script saves the returned product ID to collection variable {{product_id}} for reuse in later requests (Get/Update/Delete product).\n\nRequest\n- Method: POST\n- URL: {{base_url}}/products\n- Headers:\n  - Authorization: Bearer {{admin_token}}\n  - Content-Type: application/json\n\nRequest schema\n{\n  \"name\": \"string (required)\",\n  \"description\": \"string\",\n  \"price\": \"number (required)\",\n  \"stock\": \"integer\",\n  \"category\": \"string\"\n}\n\nExample request body\n{\n  \"name\": \"Wireless Headphones\",\n  \"description\": \"Noise-cancelling over-ear headphones\",\n  \"price\": 199.99,\n  \"stock\": 25,\n  \"category\": \"Electronics\"\n}\n\nExample 201 response\n{\n  \"success\": true,\n  \"message\": \"Product created successfully\",\n  \"data\": {\n    \"id\": \"893e8acb-aea2-4c8e-9ac7-b7fc90b676be\",\n    \"name\": \"New product test\",\n    \"description\": \"Description of New product\",\n    \"price\": 99.99,\n    \"stock\": 50,\n    \"category\": \"Electronics\",\n    \"created_at\": \"2025-11-12T04:22:13.773Z\"\n  }\n}\n\nNotes\n- Make sure {{base_url}} and {{admin_token}} are set in your environment before sending.\n- The post-response script saves the new product id to collection variable {{product_id}} when response status is 201.\n- If you receive 401/403, check that the admin token is valid and has product:create permissions.\n- Consider adding tests to assert response code 201 and presence of data.id."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products?page=1&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Purpose\nRetrieve a paginated list of products available in the store.\n\nHTTP\nGET {{base_url}}/products\n\nQuery parameters\n- page (integer, optional): Page index to fetch. Defaults to 1 if omitted.\n- limit (integer, optional): Number of items per page. Defaults to 10 if omitted. Typical range: 1–100.\n\nResponse shape (200 OK)\n{\n  \"success\": boolean,\n  \"message\": string,\n  \"data\": [\n    {\n      \"id\": string,            // Product UUID\n      \"name\": string,\n      \"description\": string,\n      \"price\": number,         // e.g., 100.99\n      \"stock\": number,         // available units\n      \"category\": string,      // e.g., \"Electronics\"\n      \"created_at\": string     // ISO 8601 timestamp\n    }\n  ],\n  \"pageNumber\": number,        // current page number\n  \"pageSize\": number,          // page size used\n  \"totalSize\": number          // total number of products\n}\n\nExample response\n{\"success\":true,\"message\":\"Products retrieved successfully\",\"data\":[{\"id\":\"d511a2ff-e3d9-4dda-8b48-dc4da75f5c1f\",\"name\":\"Television\",\"description\":\"Description détaillée\",\"price\":100.99,\"stock\":8,\"category\":\"Electronics\",\"created_at\":\"2025-11-11T16:38:44.460Z\"},{\"id\":\"7fd664fe-8443-472f-b426-33da5585f09d\",\"name\":\"Nouveau Produit\",\"description\":\"Description détaillée du nouveau produit\",\"price\":99.99,\"stock\":49,\"category\":\"Electronics\",\"created_at\":\"2025-11-11T02:32:04.108Z\"}],\"pageNumber\":1,\"pageSize\":10,\"totalSize\":2}\n\nAuthentication and usage notes\n- Auth: If the API supports public catalog browsing, this endpoint may be public. If your deployment requires authentication, inherit Bearer Token auth from the collection or set a token on this request.\n- Pagination: Use page and limit to page through results. When page*limit exceeds totalSize, data may be empty.\n- Filtering/sorting: Not supported by this request unless implemented server-side; see API docs if available.\n- Rate limiting: If enforced by your server, respect Retry-After headers and back off accordingly.\n- Environments: base_url is sourced from the active environment."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/{{product_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id}}"
+							]
+						},
+						"description": "Summary\nRetrieves a single product by its unique ID.\n\nPath variables\n- base_url: Base URL of the E-commerce API (e.g., https://api.example.com/v1).\n- product_id: UUID or identifier of the product to fetch.\n\nMethod and URL\nGET {{base_url}}/products/{{product_id}}\n\nRequired headers\n- Accept: application/json\n\nExample successful response (200)\n{\n  \"success\": true,\n  \"message\": \"Product retrieved successfully\",\n  \"data\": {\n    \"id\": \"893e8acb-aea2-4c8e-9ac7-b7fc90b676be\",\n    \"name\": \"New product test\",\n    \"description\": \"Description of New product\",\n    \"price\": 99.99,\n    \"stock\": 50,\n    \"category\": \"Electronics\",\n    \"created_at\": \"2025-11-12T04:22:13.773Z\"\n  }\n}\n\nStatus codes\n- 200 OK: Product was found and returned.\n- 400 Bad Request: Invalid product_id format or missing variables.\n- 404 Not Found: No product exists with the given product_id.\n- 500 Internal Server Error: Unexpected server error.\n\nNotes on errors\n- Ensure product_id is a valid identifier (often a UUID). Incorrect formats typically return 400.\n- If the product does not exist, expect 404 with an explanatory message.\n- For intermittent server issues, retry with backoff.\n\nExample usage (curl)\ncurl --request GET \\\n  --url \"{{base_url}}/products/{{product_id}}\" \\\n  --header \"Accept: application/json\""
+					},
+					"response": [
+						{
+							"name": "200 - Product retrieved successfully",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "/products/",
+									"path": [
+										"products",
+										""
+									],
+									"variable": [
+										{
+											"key": "base_url",
+											"value": ""
+										},
+										{
+											"key": "product_id",
+											"value": ""
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Accept",
+									"value": "application/json",
+									"description": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\"success\":true,\"message\":\"Product retrieved successfully\",\"data\":{\"id\":\"893e8acb-aea2-4c8e-9ac7-b7fc90b676be\",\"name\":\"New product test\",\"description\":\"Description of New product\",\"price\":99.99,\"stock\":50,\"category\":\"Electronics\",\"created_at\":\"2025-11-12T04:22:13.773Z\"}}"
+						},
+						{
+							"name": "200 - Product retrieved successfully",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{base_url}}/products/{{product_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"products",
+										"{{product_id}}"
+									],
+									"variable": [
+										{
+											"key": "base_url",
+											"value": "{{base_url}}"
+										},
+										{
+											"key": "product_id",
+											"value": "{{product_id}}"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Accept",
+									"value": "application/json",
+									"description": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\"success\":true,\"message\":\"Product retrieved successfully\",\"data\":{\"id\":\"893e8acb-aea2-4c8e-9ac7-b7fc90b676be\",\"name\":\"New product test\",\"description\":\"Description of New product\",\"price\":99.99,\"stock\":50,\"category\":\"Electronics\",\"created_at\":\"2025-11-12T04:22:13.773Z\"}}"
+						},
+						{
+							"name": "200 - Product retrieved successfully",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{base_url}}/products/{{product_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"products",
+										"{{product_id}}"
+									],
+									"variable": [
+										{
+											"key": "base_url",
+											"value": "{{base_url}}"
+										},
+										{
+											"key": "product_id",
+											"value": "{{product_id}}"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Accept",
+									"value": "application/json",
+									"description": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\"success\":true,\"message\":\"Product retrieved successfully\",\"data\":{\"id\":\"893e8acb-aea2-4c8e-9ac7-b7fc90b676be\",\"name\":\"New product test\",\"description\":\"Description of New product\",\"price\":99.99,\"stock\":50,\"category\":\"Electronics\",\"created_at\":\"2025-11-12T04:22:13.773Z\"}}"
+						}
+					]
+				},
+				{
+					"name": "Update Product",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"price\": 89.99,\n  \"stock\": 25\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/products/{{product_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id}}"
+							]
+						},
+						"description": "Update Product\n\nPurpose\n- Update an existing product's fields such as price and stock.\n\nHTTP method\n- PUT\n\nURL\n- {{base_url}}/products/{{product_id}}\n\nURL variables\n- base_url: Environment/collection variable representing the API base URL.\n- product_id: The ID of the product to update.\n\nRequired headers\n- Authorization: Bearer {{admin_token}}\n- Content-Type: application/json\n\nVariable notes\n- admin_token: Admin bearer token with permission to update products.\n\nExample request body\n{\n  \"price\": 89.99,\n  \"stock\": 25\n}\n\nExample successful response (200)\n{\n  \"success\": true,\n  \"message\": \"Product updated successfully\",\n  \"data\": {\n    \"id\": \"<uuid>\",\n    \"name\": \"New product test\",\n    \"description\": \"Description of New product\",\n    \"price\": 89.99,\n    \"stock\": 25,\n    \"category\": \"Electronics\",\n    \"created_at\": \"2025-11-12T04:22:13.773Z\"\n  }\n}\n\nSuggested tests\n- pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });\n- pm.test(\"Response success flag is true\", function () { pm.expect(pm.response.json().success).to.be.true; });\n- pm.test(\"Product ID is present\", function () { pm.expect(pm.response.json().data.id).to.be.a(\"string\").that.is.not.empty; });\n- pm.test(\"Price and stock updated\", function () {\n    const res = pm.response.json();\n    pm.expect(res.data.price).to.eql(89.99);\n    pm.expect(res.data.stock).to.eql(25);\n});\n- pm.test(\"Has standard fields\", function () {\n    const res = pm.response.json();\n    [\"name\", \"description\", \"category\", \"created_at\"].forEach(k => pm.expect(res.data).to.have.property(k));\n});\n\nRelated\n- Workspace: [chat-app](workspace/87ff0ebe-ea7d-40d5-a067-e7eb338ccab8)\n- Collection: [E-commerce API](collection/31459792-3536a8c0-d379-42a8-b6d4-49115cec033f)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/products/{{product_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"{{product_id}}"
+							]
+						},
+						"description": "Summary: Delete a product by ID\n\nPurpose\n- Permanently deletes a product from the catalog by its ID.\n- Requires admin authentication.\n- Use with caution: deletion is irreversible.\n\nEndpoint\n- Method: DELETE\n- URL: {{base_url}}/products/{{product_id}}\n\nPath Parameters\n- product_id (required): The unique identifier of the product to delete.\n\nHeaders\n- Authorization (required): Bearer token of an admin user. Example: Bearer {{admin_token}}\n\nResponse Examples\n- 200 OK\n  Body:\n  {\n    \"success\": true,\n    \"message\": \"Product deleted successfully\"\n  }\n\nPossible Errors\n- 400 Bad Request: Invalid product_id or malformed request.\n- 401 Unauthorized: Missing or invalid admin token.\n- 404 Not Found: Product with the given ID does not exist.\n\nUsage Notes\n- Authentication: Admin role required.\n- Ensure {{product_id}} is valid before sending the request.\n- Operation is irreversible; consider soft-delete or backups before deletion."
+					},
+					"response": [
+						{
+							"name": "200 OK - Product deleted",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer ",
+										"description": "Bearer token for an admin user"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "/products/",
+									"path": [
+										"products",
+										""
+									],
+									"variable": [
+										{
+											"key": "product_id",
+											"value": "",
+											"description": "The unique identifier of the product to delete."
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Authorization",
+									"value": "Bearer ",
+									"description": "Bearer token for an admin user"
+								}
+							],
+							"cookie": [],
+							"body": "{\"success\":true,\"message\":\"Product deleted successfully\"}"
+						}
+					]
+				}
+			],
+			"description": "Product management (CRUD)"
+		},
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "Create Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Save Order Id",
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"order_id\", jsonData.data.id);",
+									"    console.log(\"Order ID saved: \" + jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{User_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"productId\": \"{{product_id}}\",\n      \"quantity\": 2\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						},
+						"description": "Purpose: Create a new order for the authenticated user.\n\nMethod: POST\nEndpoint: {{base_url}}/orders\n\nRequired headers:\n- Authorization: Bearer <jwt> (must be a valid user token)\n- Content-Type: application/json\n\nRequest body schema:\n{\n  \"items\": [\n    {\n      \"productId\": \"string (UUID)\",\n      \"quantity\": integer (>=1)\n    }\n  ]\n}\n\nExample request body:\n{\n  \"items\": [\n    {\n      \"productId\": \"d511a2ff-e3d9-4dda-8b48-dc4da75f5c1f\",\n      \"quantity\": 2\n    }\n  ]\n}\n\nPossible responses:\n- 201 Created (success):\n{\n  \"success\": true,\n  \"message\": \"Order created successfully\",\n  \"data\": {\n    \"id\": \"e8e0d0b8-56c0-4cd0-9820-95db44a6ead1\",\n    \"user_id\": \"88e507c7-4eef-4616-bef3-773695854d67\",\n    \"description\": \"Order with 1 item(s)\",\n    \"total_price\": 201.98,\n    \"status\": \"pending\",\n    \"items\": [ /* array of order items with product_id, product_name, quantity, unit_price, total_price */ ],\n    \"created_at\": \"2025-11-12T04:25:38.582Z\"\n  }\n}\n- 400 Bad Request: Invalid body (e.g., missing items, invalid quantity)\n- 401 Unauthorized: Missing/invalid token\n- 404 Not Found: productId does not exist\n\nPost-response script:\nOn status 201, saves collection variable order_id from response body data.id.\n\nNotes:\n- Ensure the Bearer token belongs to an active user.\n- quantity must be >= 1.\n- productId must correspond to an existing product."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/orders?page=1&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Endpoint: Get User Orders\n\nSummary\nRetrieve the authenticated user’s paginated list of orders, including order items and totals.\n\nRequest\n- Method: GET\n- URL: {{base_url}}/orders?page={{page}}&limit={{limit}}\n  • Default in this request: page=1, limit=10\n\nRequired Headers\n- Authorization: Bearer {{user_token}}\n\nSuccessful Response (200)\nExample body:\n{\n  \"success\": true,\n  \"message\": \"Orders retrieved successfully\",\n  \"data\": [\n    {\n      \"id\": \"e8e0d0b8-56c0-4cd0-9820-95db44a6ead1\",\n      \"user_id\": \"88e507c7-4eef-4616-bef3-773695854d67\",\n      \"description\": \"Order with 1 item(s)\",\n      \"total_price\": 201.98,\n      \"status\": \"pending\",\n      \"items\": [\n        {\n          \"product_id\": \"d511a2ff-e3d9-4dda-8b48-dc4da75f5c1f\",\n          \"product_name\": \"Television\",\n          \"quantity\": 2,\n          \"unit_price\": 100.99,\n          \"total_price\": 201.98\n        }\n      ],\n      \"created_at\": \"2025-11-12T04:25:38.582Z\"\n    }\n  ],\n  \"pageNumber\": 1,\n  \"pageSize\": 10,\n  \"totalSize\": 1\n}\n\nUsage Notes\n- Ensure {{user_token}} is from a logged-in user; admin tokens may return a different scope depending on API rules.\n- Use page and limit to paginate through results. Large limits may be capped by the server.\n- No request body is required. Consider adding tests to assert success === true and that data is an array.\n- Common errors: 401 Unauthorized (missing/expired token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/orders/{{order_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"{{order_id}}"
+							]
+						},
+						"description": "Title: Get Order by ID\n\nDescription:\nRetrieves a single order by its ID. Use this endpoint to fetch order details including items, prices, status, and timestamps.\n\nURL and variables:\n- base_url (environment variable): Base URL for the API (e.g., https://api.example.com).\n- order_id (path variable): UUID of the order to retrieve. Example: e8e0d0b8-56c0-4cd0-9820-95db44a6ead1.\n\nHeaders:\n- Authorization: Bearer {{user_token}} (required) — A valid JWT or bearer token representing the authenticated user.\n- Accept: application/json (recommended)\n\nSuccess Response (200):\n- success: true\n- message: Order retrieved successfully\n- data: object containing order details (id, user_id, description, total_price, status, items, created_at).\n\nExample of data fields:\n- id: order UUID\n- user_id: UUID of the user who placed the order\n- description: short description of the order\n- total_price: numeric total amount\n- status: string (e.g., pending, paid, shipped)\n- items: array of item objects (product_id, product_name, quantity, unit_price, total_price)\n- created_at: ISO 8601 timestamp\n\nErrors:\n- 401 Unauthorized: missing/invalid token\n- 404 Not Found: order not found\n- 400 Bad Request: invalid order_id format\n\nSuggested tests (Postman tests to add):\n1) Verify status is 200 and response.success is true.\n2) Verify response.data.id equals the requested {{order_id}}.\n3) Verify response.data.items is an array and each item contains product_id, product_name, quantity, unit_price, total_price.\n4) Verify total_price equals the sum of item total_price values.\n\nNotes:\n- Ensure {{user_token}} belongs to a user authorized to view the order.\n- Use the Get User Orders endpoint to list orders and obtain a valid order_id for testing."
+					},
+					"response": []
+				}
+			],
+			"description": "Order management"
+		},
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"health"
+							]
+						},
+						"description": "Summary: Health check endpoint to verify the E-commerce API service is up and responsive.\n\nMethod & URL:\n- GET http://localhost:8000/health\n\nExpected Successful Response:\n- Status: 200 OK\n- Body (JSON example):\n{\n  \"success\": true,\n  \"message\": \"🚀 E-commerce API is running!\",\n  \"timestamp\": \"<ISO-8601 datetime>\",\n  \"version\": \"1.0.0\"\n}\n\nCommon Use Cases:\n- Readiness/liveness probes for container orchestration (e.g., Docker, Kubernetes).\n- CI/CD smoke tests to confirm the service is reachable after deployment.\n- Local development sanity checks to ensure the server started correctly.\n- Uptime and monitoring pings.\n\nTroubleshooting Tips:\n- If the request fails to connect, ensure the server is running and listening on port 8000 (check APP_PORT or server logs).\n- If you receive a non-200 status:\n  - 500: Check server logs for startup errors or dependency issues.\n  - 404: Confirm the route is /health and no base path prefix is required.\n- If running behind a proxy/reverse proxy, verify the correct host/port mapping and that HTTP is used (or update to HTTPS if applicable).\n- For local testing conflicts, ensure no other process is using port 8000.\n- If the response JSON differs, verify the application version/environment; some deployments may customize the message or version fields."
+					},
+					"response": []
+				}
+			],
+			"description": "Checking API status"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": ""
+		},
+		{
+			"key": "admin_token",
+			"value": ""
+		},
+		{
+			"key": "user_token",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "product_id",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "order_id",
+			"value": "",
+			"type": "default"
+		}
+	]
+}
