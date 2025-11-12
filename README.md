@@ -42,7 +42,7 @@ Before running this project, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-    git clone <your-repository-url>
+    git clone (https://github.com/stephmut24/backend_Ecommerce)
     cd e-commerce
 ```
 ### 2. Install Dependencies
@@ -112,25 +112,26 @@ Method	Endpoint	Description	Access
 
 
 #### Product Endpoints
-
+```txt
 Method	Endpoint	Description	Access
 - GET	/api/products	Get all products (with search & pagination)	Public
 - GET	/api/products/:id	Get product by ID	Public
 - POST	/api/products	Create new product	Admin
 - PUT	/api/products/:id	Update product	Admin
 - DELETE	/api/products/:id	Delete product	Admin
-
+```
 
 ### Order Endpoints
-
+```txt
 Method	Endpoint	Description	Access
 - POST	/api/orders	Create new order	User
 - GET	/api/orders	Get user's orders	User
 - GET	/api/orders/:id	Get specific order	User
 - PUT	/api/orders/:id/status	Update order status	Admin
 - GET	/api/orders/admin/orders	Get all orders (admin)	Admin
-
+```
 ## 🔐 Default Admin Account
+```txt
 The database initialization script creates a default admin user:
 
 - Email: admin@ecommerce.com
@@ -138,6 +139,7 @@ The database initialization script creates a default admin user:
 - Password: Admin123!
 
 - Role: admin
+```
 
 ## 🧪 Testing the API
 
@@ -191,7 +193,7 @@ curl -X POST http://localhost:8000/api/orders \
   }'
 ```
 ## 📁 Project Structure
-
+```txt
 src/
 ├── config/          # Database and environment configuration
 ├── models/          # TypeScript interfaces and types
@@ -201,8 +203,10 @@ src/
 ├── utils/           # Utility functions and response helpers
 ├── app.ts           # Express application setup
 └── server.ts        # Server entry point
+```
 
 ## 🔒 Security Features
+
 
 - Password hashing with bcrypt
 

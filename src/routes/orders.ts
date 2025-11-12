@@ -69,7 +69,7 @@ router.get('/', authenticate, async (req:AuthRequest, res)=>{
     }
 })
 
-// GET /orders/:id - Obtenir une commande spécifique
+// GET /orders/:id - Get a specific order
 router.get('/:id', authenticate, async (req: AuthRequest, res) => {
   try {
     const orderId = req.params.id;
@@ -97,7 +97,7 @@ router.get('/:id', authenticate, async (req: AuthRequest, res) => {
   }
 });
 
-// PUT /orders/:id/status - Mettre à jour le statut d'une commande (Admin seulement)
+// PUT /orders/:id/status - Update order status (Admin only)
 router.put('/:id/status', authenticate, requireAdmin, validate(updateOrderStatusSchema), async (req: AuthRequest, res) => {
   try {
     const orderId = req.params.id;
@@ -123,13 +123,13 @@ router.put('/:id/status', authenticate, requireAdmin, validate(updateOrderStatus
   }
 });
 
-// GET /admin/orders - Obtenir toutes les commandes (Admin seulement)
+// GET /admin/orders - Get all orders (Admin only)
 router.get('/admin/orders', authenticate, requireAdmin, async (req: AuthRequest, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
 
-    // Validation des paramètres de pagination
+    // Validating paging settings
     if (page < 1) {
       return res.status(400).json({
         success: false,

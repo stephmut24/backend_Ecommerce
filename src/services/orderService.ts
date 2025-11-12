@@ -222,9 +222,9 @@ export class OrderService {
         return createResponse(true, 'Order retrieved successfully', orderResponse);
     }
 
-    // Mettre à jour le statut d'une commande (Admin seulement)
+    // Update order status (Admin only)
     static async updateOrderStatus(orderId: string, status: string): Promise<any> {
-        // Vérifier si la commande existe
+        // Check if the order exists
         const existingOrder = await query(
             'SELECT id FROM orders WHERE id = $1',
             [orderId]
@@ -234,7 +234,7 @@ export class OrderService {
             return createResponse(false, 'Order not found', null, ['Order does not exist']);
         }
 
-        // Valider le statut
+        // Validate status
         const validStatuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
         if (!validStatuses.includes(status)) {
             return createResponse(false, 'Invalid status', null, [`Status must be one of: ${validStatuses.join(', ')}`]);
@@ -250,7 +250,7 @@ export class OrderService {
 
         const order = result.rows[0];
 
-        // Obtenir les articles pour la réponse
+        // Get the articles for the answer
         const itemsResult = await query(
             `SELECT oi.product_id, p.name as product_name, oi.quantity, oi.unit_price, 
               (oi.quantity * oi.unit_price) as total_price
@@ -279,16 +279,16 @@ export class OrderService {
         return createResponse(true, 'Order status updated successfully', orderResponse);
     }
 
-    // Obtenir toutes les commandes (Admin seulement)
+    // Get all orders (Admin only)
     static async getAllOrders(page: number = 1, limit: number = 10): Promise<any> {
         const offset = (page - 1) * limit;
 
-        // Compter le total des commandes
+        // Count total orders
         const countResult = await query('SELECT COUNT(*) FROM orders');
         const totalOrders = parseInt(countResult.rows[0].count);
         const totalPages = Math.ceil(totalOrders / limit);
 
-        // Obtenir les commandes avec pagination
+        // Getting orders with pagination
         const ordersResult = await query(
             `SELECT o.id, o.user_id, o.description, o.total_price, o.status, o.created_at,
               u.username, u.email
